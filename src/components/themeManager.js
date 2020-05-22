@@ -1,25 +1,35 @@
-import themeData from './data/themes.json';
+const defaultTheme = {
+    label: 'Classic',
+    value: 0,
+    mainColor: '#000000',
+    accentColor: '#1e272e',
+    backgroundColor: '#ffffff'
+};
 
-const setTheme = (theme) => {
-    localStorage.setItem("theme", theme);
+const setTheme = theme => {
+    localStorage.setItem('theme', theme);
     window.location.reload();
-}
+};
 
 const resetTheme = () => {
-    localStorage.removeItem("theme");
-}
+    localStorage.removeItem('theme');
+};
 
 const getTheme = () => {
+    let selectedTheme = defaultTheme;
 
-    let selectedTheme = themeData.themes[0];
-
-    if (localStorage.getItem("theme") && localStorage.getItem("theme") !== undefined) {
-        selectedTheme = JSON.parse(localStorage.getItem("theme"));
+    if (
+        localStorage.getItem('theme') &&
+        localStorage.getItem('theme') !== undefined
+    ) {
+        selectedTheme = JSON.parse(localStorage.getItem('theme'));
     }
 
     return selectedTheme;
-}
+};
 
-export { setTheme, resetTheme }
+const selectedTheme = getTheme();
 
-export default getTheme;
+export { setTheme, resetTheme };
+
+export default selectedTheme;

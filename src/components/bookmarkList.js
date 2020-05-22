@@ -1,20 +1,17 @@
-import React from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
-import bookmarkData from './data/bookmarks.json';
+import selectedTheme from './themeManager';
+import {
+    Headline,
+    ListContainer,
+    ItemList,
+    Item,
+    RefreshButton,
+    ErrorMessage
+} from './elements';
 
-import themeData from './data/themes.json'
-const selectedTheme = localStorage.getItem("theme") ? JSON.parse(localStorage.getItem("theme")) : themeData.themes[0];
-
-const BookmarksText = styled.h3`
-    font-family: Roboto, sans-serif;
-    text-transform: uppercase;
-    margin: 0;
-    font-size: 20px;
-    color: ${selectedTheme.mainColor};
-`;
-
-const GroupText = styled.h4`
+const Group = styled.h4`
     font-family: Roboto, sans-serif;
     font-weight: 700;
     margin: 0;
@@ -22,27 +19,11 @@ const GroupText = styled.h4`
     color: ${selectedTheme.mainColor};
 `;
 
-const BookmarkListContainer = styled.div`
-    padding: 2rem 0 2rem 0;
-`;
-
-const BookmarksContainer = styled.div`
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    width: 100%;
-
-    @media (max-width: 600px) {
-        flex-direction: column;
-    }
-`;
-
-const BookmarkGroupContainer = styled.div`
+const BookmarkGroup = styled.div`
     display: flex;
     flex-direction: column;
-    flex: 1 0 21%;
-    padding-top: 2rem;
-    font-size: 15px;
+    flex: 2 1 auto;
+    padding: 1rem 0 1rem 0;
 `;
 
 const Bookmark = styled.a`
@@ -54,26 +35,65 @@ const Bookmark = styled.a`
     font-size: 14px;
 `;
 
-const bookmarkList = () => (
-    <BookmarkListContainer>
-        <BookmarksText>Bookmarks</BookmarksText>
-        <BookmarksContainer>
+const handleResponse = response => {
+    if (response.ok) {
+        return response.json();
+    }
+    throw new Error('Failed to load app data.');
+};
 
-        {
-            bookmarkData.groups.map((group) => (
-                <BookmarkGroupContainer>
-                    <GroupText>{group.name}</GroupText>
-                    { 
-                        group.items.map((link) => (
-                            <Bookmark href={link.url}>{link.name}</Bookmark>
-                        ))
-                    }
-                </BookmarkGroupContainer>
-            ))
-        }
+const useBookmarkData = () => {
+    const [bookmarkData, setBookmarkData] = useState({
+        groups: [],
+        error: false
+    });
+    const fetchBookmarkData = useCallback(() => {
+        (process.env.NODE_ENV === 'production'
+            ? fetch('/bookmarks.json').then(handleResponse)
+            : import('./data/bookmarks.json')
+        )
+            .then(jsonResponse => {
+                setBookmarkData({ ...jsonResponse, error: false });
+            })
+            .catch(error => {
+                setBookmarkData({ groups: [], error: error.message });
+            });
+    }, []);
 
-        </BookmarksContainer>
-    </BookmarkListContainer>
-);
+    useEffect(() => {
+        fetchBookmarkData();
+    }, [fetchBookmarkData]);
+    return { bookmarkData, fetchBookmarkData };
+};
 
-export default bookmarkList;
+const BookmarkList = () => {
+    const {
+        bookmarkData: { groups, error },
+        fetchBookmarkData
+    } = useBookmarkData();
+    return (
+        <ListContainer>
+            <Headline>Bookmarks</Headline>
+            <RefreshButton onClick={fetchBookmarkData}>refresh</RefreshButton>
+            <ItemList>
+                {error && <ErrorMessage>{error}</ErrorMessage>}
+                {groups.map((group, idx) => {
+                    return (
+                        <Item key={[group.name, idx].join('')}>
+                            <BookmarkGroup>
+                                <Group>{group.name}</Group>
+                                {group.items.map(({ url, name: linkName }) => (
+                                    <Bookmark key={linkName} href={url}>
+                                        {linkName}
+                                    </Bookmark>
+                                ))}
+                            </BookmarkGroup>
+                        </Item>
+                    );
+                })}
+            </ItemList>
+        </ListContainer>
+    );
+};
+
+export default BookmarkList;

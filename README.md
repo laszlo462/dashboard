@@ -1,6 +1,6 @@
-﻿# Dashboard
+# Dashboard
 
-![screenshot](screenshot.png 'screenshot')
+![screenshot](https://github.com/phntxx/dashboard/blob/master/screenshot.png 'screenshot')
 
 Dashboard is just that - a dashboard. It's inspired by [SUI](https://github.com/jeroenpardon/sui) and has all the same features as SUI, such as simple customization through JSON-files and a handy search bar to search the internet more efficiently.
 
@@ -18,40 +18,28 @@ Getting Dashboard to run is fairly simple and can be accomplished with two techn
 
 1. Locally
 
-**Prerequisites: node, npm, yarn**
-
-To get Dashboard to run, just clone the repository, download the dependencies using yarn, then start using `yarn start`.
+Prerequisites: yarn, npm, node
 
 ```
-git clone https://github.com/phntxx/dashboard.git
-cd dashboard
-yarn
-yarn build
-yarn serve:production
+$ git clone https://github.com/phntxx/dashboard.git
+$ cd dashboard/
+$ yarn
+$ yarn build
+$ yarn serve:production
 ```
-
-alternatively, if you want to work using static files (requires a rebuild for
-every change in the JSON-files), just replace `yarn start` with `yarn build`.
-Then you can copy the files inside the `build` directory onto the webroot of
-your webserver of choice.
 
 2. Using Docker
 
-Using Docker requires building the container manually. Fortunately, this can be accomplished fairly easily:
-
 ```
-git clone https://github.com/phntxx/dashboard.git
-cd dashboard
-docker build -t dashboard:1.0
-
-docker run -d \
--t \
--p 3000:3000 \
--v ./src/components/data:/app/src/components/data \
-dashboard:1.0
+$ docker run -d \
+	-v $(pwd)/data:/app/data
+	-p 3000:3000 \
+	--name dashboard \
+	phntxx/dashboard
 ```
 
-**NOTE: The `-t` flag is very important, as the Dockerfile requires standard TTY.**
+**Note: You might still need to clone the repository in order to get the JSON-files which are required for the
+app to run**
 
 ## Customization
 

@@ -5,11 +5,11 @@ import styled from 'styled-components';
 import selectedTheme from './themeManager';
 
 import {
+    handleResponse,
     Headline,
     ListContainer,
     ItemList,
     Item,
-    RefreshButton,
     ErrorMessage
 } from './elements';
 
@@ -31,6 +31,10 @@ const Link = styled.a`
     margin: 0;
     text-decoration: none;
     font-size: 1rem;
+
+    &:hover {
+        text-decoration: underline;
+    }
 `;
 
 const Description = styled.p`
@@ -47,13 +51,6 @@ const App = styled.div`
     flex-basis: 25%;
     padding: 1rem;
 `;
-
-const handleResponse = response => {
-    if (response.ok) {
-        return response.json();
-    }
-    throw new Error('Failed to load app data.');
-};
 
 const useAppData = () => {
     const [appData, setAppData] = useState({ apps: [], error: false });
@@ -84,7 +81,6 @@ const AppList = () => {
     return (
         <ListContainer>
             <Headline>Applications</Headline>
-            <RefreshButton onClick={fetchAppData}>refresh</RefreshButton>
             <ItemList>
                 {error && <ErrorMessage>{error}</ErrorMessage>}
                 {apps.map((app, idx) => {
